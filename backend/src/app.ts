@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 
 app.get("/health", (req, res) => {
-    res.json({ status: "ok", message: " Backend server is running" });
+    res.json({ status: "ok", message: "Backend server is running" });
 })
 
 app.use("/api/auth", authRoutes);
