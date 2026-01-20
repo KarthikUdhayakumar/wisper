@@ -5,10 +5,6 @@ import { User } from "../models/User";
 import { Chat } from "../models/Chat";
 import { Message } from "../models/Message";
 
-export interface SocketWithUserId extends Socket {
-    userId?: string;
-}
-
 const onlineUsers = new Map<string, string>();
 
 export const initializeSocket = (server: HttpServer) => {
@@ -34,7 +30,7 @@ export const initializeSocket = (server: HttpServer) => {
             const clerkId = session.sub;
             const user = await User.findOne({ clerkId });
             if (!user) return next(new Error("User not found"));
-            (socket as SocketWithUserId).userId = user._id.toString();
+            socket.data.userId = user._id.toString();
             next();
         } catch (error: any) {
             return next(new Error(error));
@@ -42,7 +38,7 @@ export const initializeSocket = (server: HttpServer) => {
     })
 
     io.on("connection", (socket) => {
-        const userId = (socket as SocketWithUserId).userId as string;
+        const userId = socket.data.userId as string;
 
         socket.emit("online-users", { userIds: Array.from(onlineUsers.keys()) });
         onlineUsers.set(userId!, socket.id);
@@ -83,7 +79,7 @@ export const initializeSocket = (server: HttpServer) => {
                 chat.lastMessageAt = new Date();
                 await chat.save();
 
-                await message.populate("sender", "name email avatar");
+                await message.populate("sender", "name avatar");
 
                 io.to(`chat:${chatId}`).emit("new-message", message);
 
