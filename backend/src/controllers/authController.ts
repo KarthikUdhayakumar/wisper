@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { User } from "../models/User";
 import { clerkClient, getAuth } from "@clerk/express";
 
-export const getMe = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export async function getMe(req: AuthRequest, res: Response, next: NextFunction) {
     try {
         const userId = req.userId
         const user = await User.findById(userId)
@@ -16,7 +16,7 @@ export const getMe = async (req: AuthRequest, res: Response, next: NextFunction)
     }
 }
 
-export const callback = async (req: Request, res: Response, next: NextFunction) => {
+export async function callback(req: Request, res: Response, next: NextFunction) {
     try {
         const { userId: clerkId } = getAuth(req);
         if (!clerkId) return res.status(401).json({ message: "Unauthorized" });
